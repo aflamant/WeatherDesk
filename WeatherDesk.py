@@ -56,7 +56,7 @@ _________________________|________________
 
  If using with --time 2, add:
  "day-" or "night-"
- 
+
  If you use --no-weather, the files have to be named simply after the time of day depending of your time schema.
  E.g.: "day.jpg", "night.jpg"
 '''
@@ -92,7 +92,7 @@ def get_args():
       2 = day/night
       3 = day/evening/night [Default]
       4 = morning/day/evening/night
-    
+
     See --naming.''',
         type=int, choices=[2, 3, 4], default=3, required=False)
 
@@ -115,6 +115,11 @@ def get_args():
     arg_parser.add_argument(
         '-o', '--one-time-run', action='store_true',
         help='Run once, then exit.',
+        required=False)
+
+    arg_parser.add_argument(
+        '--dst', action='store_true',
+        help='Use this to set the sunset-sunrise times according to DST (sun sets 1 hour later in the evening)',
         required=False)
 
     return vars(arg_parser.parse_args())
@@ -156,7 +161,7 @@ def validate_args(args):
     return parsed_args
 
 
-def get_time_of_day(level=3, hour=None):
+def get_time_of_day(level=3, hour=None, dst=True):
     """
     For detail level 2:
     06 to 20: day
@@ -168,13 +173,16 @@ def get_time_of_day(level=3, hour=None):
     20 to 06: night
 
     For detail level 4:
-    06 to 10: morning
+    06 to 8: morning
     10 to 17: day
     17 to 20: evening
     20 to 06: night
     """
     if hour is None:
         current_hour = datetime.datetime.now().hour
+        if dst:
+            print('DST mode engaged\n')
+            current_hour -= 1
     else:
         current_hour = hour
 
@@ -186,7 +194,7 @@ def get_time_of_day(level=3, hour=None):
         thres = [5, 16, 19]
     elif level == 4:
         labels = ['morning', 'day', 'evening', 'night']
-        thres = [5, 9, 16, 19]
+        thres = [5, 7, 16, 19]
     else:
         raise ValueError('Invalid time level.')
 
@@ -300,7 +308,7 @@ def get_current_weather(city):
     return weather, city_with_area
 
 
-def set_conditional_wallpaper(city, time_level, no_weather, walls_dir, file_format):
+def set_conditional_wallpaper(city, time_level, no_weather, walls_dir, file_format, dst):
     if not no_weather:
         weather, actual_city = get_current_weather(city)
         weather_code = get_weather_summary(weather)
@@ -308,7 +316,7 @@ def set_conditional_wallpaper(city, time_level, no_weather, walls_dir, file_form
     else:
         weather_code = None
 
-    time_of_day = get_time_of_day(time_level)
+    time_of_day = get_time_of_day(level = time_level, dst = dst)
     print('The current time of the day is {}'.format(time_of_day))
 
     file_name = get_file_name(weather_code, time_of_day, walls_dir, file_format)
@@ -357,7 +365,8 @@ if __name__ == '__main__':
                                       parsed_args['time'],
                                       parsed_args['no_weather'],
                                       parsed_args['walls_dir'],
-                                      parsed_args['file_format'])
+                                      parsed_args['file_format'],
+                                      parsed_args['dst'])
 
         except urllib.error.URLError:
             # Don't shut off on temporary network problems
