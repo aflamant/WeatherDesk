@@ -168,8 +168,8 @@ def get_time_of_day(level=3, hour=None):
     20 to 06: night
 
     For detail level 4:
-    06 to 08: morning
-    08 to 17: day
+    06 to 10: morning
+    10 to 17: day
     17 to 20: evening
     20 to 06: night
     """
@@ -186,7 +186,7 @@ def get_time_of_day(level=3, hour=None):
         thres = [5, 16, 19]
     elif level == 4:
         labels = ['morning', 'day', 'evening', 'night']
-        thres = [5, 7, 16, 19]
+        thres = [5, 9, 16, 19]
     else:
         raise ValueError('Invalid time level.')
 
