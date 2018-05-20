@@ -201,7 +201,7 @@ def get_weather_summary(weather_name):
                  'wind': ['breez', 'gale', 'wind'],  # breez matches both breeze and breezy
                  'thunder': ['thunder'],
                  'snow': ['snow'],
-                 'cloudy': ['cloud']}
+                 'cloudy': ['cloud', 'mostly cloudy']}
 
     for summary, options in summaries.items():
         if weather_name in options:
